@@ -1,0 +1,83 @@
+import cv2 
+from cvzone.PoseModule import PoseDetector 
+cap = cv2.VideoCapture(0) 
+detector = PoseDetector() 
+posList = [] 
+while True: 
+success, img = cap.read() 
+img = 
+detector.findPose(img) 
+lmList, bboxInfo =detector.findPosition(img)
+if bboxInfo: 
+lmString = '' 
+for lm in lmList: 
+lmString += f'{lm[1]},{img.shape[0] - lm[2]},{lm[3]},' 
+posList.append(lmString) 
+print(len(posList) 
+cv2.imshow("Image", img) 
+key = cv2.waitKey(1) 
+if key == ord('s'): 
+with open("AnimationFile.txt", 'w') as f:f.writelines(["%s\n" % 
+item for item in posList]) 
+mp_pose = mp.solutions.pose 
+pose = mp_pose.Pose(min_detection_confidence=0.5, 
+min_tracking_confidence=0.5) 
+# Initialize drawing utils 
+mp_drawing = mp.solutions.drawing_utils 
+def plot_3d_landmarks(landmarks): 
+"""Plots 3D landmarks using Matplotlib.""" 
+fig = plt.figure(figsize=(8, 6)) 
+ax = fig.add_subplot(111, projection='3d') 
+x_vals = [landmark[0] for landmark in landmarks] 
+y_vals = [landmark[1] for landmark in landmarks] 
+z_vals = [landmark[2] for landmark in landmarks] 
+ax.scatter(x_vals, y_vals, z_vals, c='r', marker='o') 
+ax.set_xlabel('X-axis') 
+ax.set_ylabel('Y-axis') 
+ax.set_zlabel('Z-axis') 
+ax.set_title('3D Pose Landmarks') 
+plt.show() 
+def process_video(video_source=0): 
+"""Processes video input for 3D pose detection.""" 
+cap = cv2.VideoCapture(video_source) 
+if not cap.isOpened(): 
+print("Error: Could not open video source.") 
+return 
+while True: 
+ret, frame = cap.read() 
+if not ret: 
+print("Error: Failed to read frame.") 
+break 
+# Convert frame to RGB 
+rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) 
+# Process the frame for pose detection 
+results = pose.process(rgb_frame) 
+# Draw landmarks and connections on the frame 
+if results.pose_landmarks: 
+mp_drawing.draw_landmarks( 
+frame, results.pose_landmarks, 
+mp_pose.POSE_CONNECTIONS, 
+mp_drawing.DrawingSpec(color=(0, 255, 0), 
+thickness=2, circle_radius=2), 
+mp_drawing.DrawingSpec(color=(0, 0, 255), 
+thickness=2, circle_radius=2) 
+)
+# Extract 3D landmarks 
+landmarks_3d = [ 
+(lm.x, lm.y, lm.z) for lm in 
+results.pose_landmarks.landmark 
+] 
+# Visualize 3D landmarks 
+plot_3d_landmarks(landmarks_3d) 
+# Display the frame 
+cv2.imshow('3D Motion Capture', frame) 
+# Quit if 'q' is pressed 
+if cv2.waitKey(1) & 0xFF == ord('q'): 
+break 
+cap.release() 
+cv2.destroyAllWindows() 
+if  name == " main ": 
+process_video(0)
+
+
+
