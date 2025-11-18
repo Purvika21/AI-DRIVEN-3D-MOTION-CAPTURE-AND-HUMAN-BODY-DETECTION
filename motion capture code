@@ -1,0 +1,84 @@
+import cv2 
+import mediapipe as mp 
+# Initialize MediaPipe Pose module 
+mp_pose = mp.solutions.pose 
+mp_drawing = mp.solutions.drawing_utils 
+pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) 
+def main(): 
+# Open the webcam
+cap = cv2.VideoCapture(0) 
+if not cap.isOpened(): 
+print("Error: Could not access the webcam.") 
+return 
+print("Press 'q' to quit.") 
+while True: 
+ret, frame = cap.read() 
+if not ret: 
+print("Error: Failed to capture frame from webcam.") 
+break 
+# Convert the frame to RGB as MediaPipe requires 
+rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) 
+# Process the frame to detect pose 
+results = pose.process(rgb_frame) 
+# Draw pose landmarks on the original frame 
+if results.pose_landmarks: 
+mp_drawing.draw_landmarks( 
+frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS, 
+mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=2, circle_radius=2), 
+mp_drawing.DrawingSpec(color=(0, 0, 255), thickness=2, circle_radius=2) 
+) 
+# Display the frame 
+cv2.imshow('3D Motion Capture - Pose Estimation', frame) 
+# Quit if 'q' is pressed 
+if cv2.waitKey(1) & 0xFF == ord('q'): 
+break 
+# Release resources 
+cap.release() 
+cv2.destroyAllWindows() 
+mp_pose = mp.solutions.pose 
+mp_drawing = mp.solutions.drawing_utils 
+pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) 
+def process_video(video_path, output_path=None): 
+# Open the video file 
+cap = cv2.VideoCapture(video_path) 
+if not cap.isOpened(): 
+print("Error: Could not open the video file.") 
+return 
+# Get video properties 
+frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) 
+frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) 
+fps = int(cap.get(cv2.CAP_PROP_FPS)) 
+# Define video writer if output path is provided 
+if output_path: 
+fourcc = cv2.VideoWriter_fourcc(*'mp4v') 
+out = cv2.VideoWriter(output_path, fourcc, fps, (frame_width, frame_height)) 
+while cap.isOpened(): 
+ret, frame = cap.read() 
+if not ret: 
+print("End of video or error reading frame.") 
+break 
+# Convert the frame to RGB 
+rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+# Process the frame for pose detection 
+results = pose.process(rgb_frame) 
+# Draw pose landmarks on the frame 
+if results.pose_landmarks: 
+mp_drawing.draw_landmarks( 
+frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS, 
+mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=2, circle_radius=2), 
+mp_drawing.DrawingSpec(color=(0, 0, 255), thickness=2, circle_radius=2) 
+) 
+# Display the frame 
+cv2.imshow('Pose Detection - Video Recognition', frame) 
+# Write to output file if enabled 
+if output_path: 
+out.write(frame) 
+# Exit if 'q' is pressed 
+if cv2.waitKey(1) & 0xFF == ord('q'): 
+break 
+if   name == "  main  ": 
+# Specify the input video file path 
+input_video = "input_video.mp4" # Replace with your video file path 
+# Specify the output video file path (optional) 
+output_video = "output_video.mp4" # Replace with desired output path or None 
+process_video(input_video, output_video)
